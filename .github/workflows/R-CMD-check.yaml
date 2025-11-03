@@ -38,20 +38,20 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - uses: r-lib/actions/setup-pandoc@473c68190595b311a74f208fba61a8d8c0d4c247 # v2
+      - uses: r-lib/actions/setup-pandoc@6f6e5bc62fba3a704f74e7ad7ef7676c5c6a2590 # v2
 
       - name: "Set up Chrome" # for PDF rendering
         uses: browser-actions/setup-chrome@facf10a55b9caf92e0cc749b4f82bf8220989148 # v1.7.2
 
       - name: "Setup R"
-        uses: r-lib/actions/setup-r@473c68190595b311a74f208fba61a8d8c0d4c247 # v2
+        uses: r-lib/actions/setup-r@6f6e5bc62fba3a704f74e7ad7ef7676c5c6a2590 # v2
         with:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
       - name: "Setup dependencies"
-        uses: r-lib/actions/setup-r-dependencies@473c68190595b311a74f208fba61a8d8c0d4c247 # v2
+        uses: r-lib/actions/setup-r-dependencies@6f6e5bc62fba3a704f74e7ad7ef7676c5c6a2590 # v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
@@ -64,6 +64,6 @@ jobs:
         shell: Rscript {0}
 
       - name: "Check"
-        uses: r-lib/actions/check-r-package@473c68190595b311a74f208fba61a8d8c0d4c247 # v2
+        uses: r-lib/actions/check-r-package@6f6e5bc62fba3a704f74e7ad7ef7676c5c6a2590 # v2
         with:
           upload-snapshots: true
