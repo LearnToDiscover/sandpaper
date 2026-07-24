@@ -220,7 +220,6 @@ create_pkgdown_yaml <- function(path) {
       dc             = usr$carpentry == 'dc',
       swc            = usr$carpentry == 'swc',
       hpcc           = usr$carpentry == 'hpcc',
-      aic            = usr$carpentry == 'aic',
       # Should we display a lifecycle banner?
       life_cycle = siQuote(usr$life_cycle),
       pre_alpha  = usr$life_cycle == "pre-alpha",
