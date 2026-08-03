@@ -115,11 +115,11 @@ get_trimmed_title <- function(next_page) {
   }
   next_title <- strsplit(next_page$pagetitle, "\\s")[[1]]
   # only allow titles up to 20 characters long
-  ok <- (cumsum(nchar(next_title)) + (seq(next_title) - 1)) <= 20
+  ok <- (cumsum(nchar(next_title)) + (seq(next_title) - 1)) <= 40
   if (sum(ok) > 0) {
     parse_title(paste(next_title[ok], collapse = " "))
   } else {
-    parse_title(substr(next_page$pagetitle, 1, 20))
+    parse_title(substr(next_page$pagetitle, 1, 40))
   }
 }
 
