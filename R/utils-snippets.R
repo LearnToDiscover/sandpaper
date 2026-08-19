@@ -73,18 +73,18 @@ drop_null_fields <- function(x) {
   x[!vapply(x, is.null, logical(1))]
 }
 
-get_lesson_customization <- function(path, env_var = "CUSTOM_SNIPPETS", quiet = TRUE) {
+get_lesson_customization <- function(path, env_var = "WORKBENCH_OVERLAY_CUSTOMIZATION", quiet = TRUE) {
   root <- tryCatch(root_path(path), error = function(...) NULL)
   if (is.null(root)) {
     return(NULL)
   }
 
   lesson_config <- yaml::read_yaml(path_config(root), eval.expr = FALSE)
-  if (is.null(lesson_config$base_snippets) || !nzchar(lesson_config$base_snippets)) {
+  if (is.null(lesson_config$workbench_base_customization) || !nzchar(lesson_config$workbench_base_customization)) {
     return(NULL)
   }
 
-  base_name <- normalize_snippets_config_name(lesson_config$base_snippets)
+  base_name <- normalize_snippets_config_name(lesson_config$workbench_base_customization)
   if (is.null(base_name)) {
     return(NULL)
   }
@@ -96,10 +96,10 @@ get_lesson_customization <- function(path, env_var = "CUSTOM_SNIPPETS", quiet = 
   }
   base_cfg <- base_exists[[1]]
   if (!quiet) {
-    cli::cli_alert_info("Using base snippets config: {base_cfg}")
+    cli::cli_alert_info("Using base customisation config: {base_cfg}")
   }
 
-  custom_snippets_path <- Sys.getenv(env_var, unset = lesson_config$custom_snippets %||% "")
+  custom_snippets_path <- Sys.getenv(env_var, unset = lesson_config$workbench_overlay_customization %||% "")
   custom_name <- normalize_snippets_config_name(custom_snippets_path)
   has_custom <- !is.null(custom_name)
 
@@ -116,7 +116,7 @@ get_lesson_customization <- function(path, env_var = "CUSTOM_SNIPPETS", quiet = 
     }
     custom_snippets <- custom_exists[[1]]
     if (!quiet) {
-      cli::cli_alert_info("Using custom snippets config: {custom_snippets}")
+      cli::cli_alert_info("Using overlay customization config: {custom_snippets}")
     }
 
     custom <- read_lesson_yaml(custom_snippets, root)
@@ -159,15 +159,15 @@ get_snippets_hash <- function(path) {
     yaml::read_yaml(path_config(root), eval.expr = FALSE),
     error = function(...) NULL
   )
-  if (is.null(lesson_config) || is.null(lesson_config$base_snippets) || !nzchar(lesson_config$base_snippets)) {
+  if (is.null(lesson_config) || is.null(lesson_config$workbench_base_customization) || !nzchar(lesson_config$workbench_base_customization)) {
     return(NULL)
   }
 
   # Collect the active config YAML files
-  base_name   <- normalize_snippets_config_name(lesson_config$base_snippets)
-  custom_name <- normalize_snippets_config_name(Sys.getenv("CUSTOM_SNIPPETS", unset = ""))
+  base_name   <- normalize_snippets_config_name(lesson_config$workbench_base_customization)
+  custom_name <- normalize_snippets_config_name(Sys.getenv("WORKBENCH_OVERLAY_CUSTOMIATION", unset = ""))
   if (is.null(custom_name)) {
-    custom_name <- normalize_snippets_config_name(lesson_config$custom_snippets)
+    custom_name <- normalize_snippets_config_name(lesson_config$workbench_overlay_customization)
   }
 
   config_files <- character(0)
@@ -181,8 +181,8 @@ get_snippets_hash <- function(path) {
   # Also include the relevant lines from config.yaml itself so that changing
   # base_snippets / custom_snippets invalidates the hash
   snippet_keys <- paste(
-    lesson_config$base_snippets %||% "",
-    lesson_config$custom_snippets %||% "",
+    lesson_config$workbench_base_customization %||% "",
+    lesson_config$workbench_overlay_customization %||% "",
     sep = "\n"
   )
 
@@ -213,10 +213,10 @@ missing_snippets_config_error <- function(path) {
   root <- root_path(path)
   paste0(
     "Episode uses snippet/config placeholders (`config$...` or `snippets()`), ",
-    "but top-level lesson config.yaml must set a valid `base_snippets` folder in ",
+    "but top-level lesson config.yaml must set a valid `workbench_base_customization` folder in ",
     path_customization(root),
-    ". Optionally also set `custom_snippets` in config.yaml or use the ",
-    "CUSTOM_SNIPPETS environment variable to override, in ",
+    ". Optionally also set `workbench_overlay_customization` in config.yaml or use the ",
+    "WORKBENCH_OVERLAY_CUSTOMIZATION environment variable to override, in ",
     path_config(root)
   )
 }

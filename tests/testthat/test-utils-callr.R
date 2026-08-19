@@ -67,7 +67,7 @@ test_that("callr_build_episode_md() injects lesson config and snippets", {
   fs::dir_create(out)
 
   writeLines(c(
-    "base_snippets: base"
+    "workbench_base_customization: base"
   ), fs::path(lsn, "config.yaml"))
 
   writeLines(c(
@@ -170,6 +170,6 @@ test_that("build_episode_md() errors clearly when config placeholders are used w
 
   expect_error(
     build_episode_md(ep, outdir = out, workdir = out, quiet = TRUE, error = TRUE),
-    "must set a valid `base_snippets`"
+    "must set a valid `workbench_base_customization`"
   )
 })

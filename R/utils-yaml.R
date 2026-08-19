@@ -353,7 +353,7 @@ has_snippets_config <- function(path) {
   }
 
   lesson_config <- yaml::read_yaml(cfg_file, eval.expr = FALSE)
-  base_snippets <- lesson_config$base_snippets
+  base_snippets <- lesson_config$workbench_base_customization
   use_snippets <- !is.null(base_snippets) && is.character(base_snippets) && length(base_snippets) == 1L && nzchar(trimws(base_snippets))
   if (!use_snippets) {
     return(FALSE)
