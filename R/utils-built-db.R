@@ -21,7 +21,11 @@ get_built_db <- function(db = "site/built/md5sum.txt", filter = "*R?md") {
     return(data.frame(file = character(0), checksum = character(0), built = character(0)))
   }
   files <- read.table(db, header = TRUE)
-  are_markdown <- grepl(filter, fs::path_ext(files[["file"]]))
+  are_markdown <- if (identical(filter, "*")) {
+    rep(TRUE, nrow(files))
+  } else {
+    grepl(filter, fs::path_ext(files[["file"]]))
+  }
   return(files[are_markdown, , drop = FALSE])
 }
 
