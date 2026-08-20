@@ -169,6 +169,18 @@ hash_children <- function(checksums, files, lineage) {
   return(res)
 }
 
+relative_to_root <- function(path, root) {
+  rel <- fs::path_rel(path, start = root)
+  needs_dedotting <- startsWith(rel, "..")
+  if (any(needs_dedotting)) {
+    rel[needs_dedotting] <- fs::path_rel(
+      fs::path_real(path[needs_dedotting]),
+      start = fs::path_real(root)
+    )
+  }
+  rel
+}
+
 # Return list of child nodes used in each file
 #' @rdname hash_children
 #' @param lsn a [pegboard::Lesson] object
@@ -181,7 +193,7 @@ get_lineages <- function(lsn) {
   # We need to set the names to the relative path to match our file inputs
   names(lineages) <- vapply(lineages,
     FUN = function(l, p) {
-      fs::path_rel(l[1], start = p)
+      relative_to_root(l[1], p)
     },
     FUN.VALUE = character(1),
     p = lsn$path
@@ -298,7 +310,7 @@ build_status <- function(sources, db = "site/built/md5sum.txt", rebuild = FALSE,
   # If we have a single source passed in, this means that we want to update it
   # in the database and force it to rebuild
   root_path <- root_path(fs::path_common(sources)) # ensure we're at the actual lesson root path
-  sources    <- fs::path_rel(sources, start = root_path)
+  sources    <- relative_to_root(sources, root_path)
 
   built_path <- fs::path_rel(fs::path_dir(db), root_path)
   # built files are flattened here
