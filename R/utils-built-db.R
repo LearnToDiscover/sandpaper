@@ -306,6 +306,7 @@ build_status <- function(sources, db = "site/built/md5sum.txt", rebuild = FALSE,
   date <- format(Sys.Date(), "%F")
   # calculate checksums -------------------------------------------------------
   checksums <- tools::md5sum(fs::path(root_path, sources))
+  names(checksums) <- sources
   # if there are any RMD documents, we check for child documents
   is_rmd <- tolower(fs::path_ext(sources)) == "rmd"
   if (any(is_rmd)) {
@@ -331,9 +332,9 @@ build_status <- function(sources, db = "site/built/md5sum.txt", rebuild = FALSE,
         logical(1),
         USE.NAMES = FALSE
       )
-      affected_abs <- rmd_sources_abs[uses_snippets]
-      for (ep_abs in affected_abs) {
-        checksums[[ep_abs]] <- rlang::hash(c(unname(checksums[[ep_abs]]), snippets_hash))
+      affected_rel <- rmd_sources_rel[uses_snippets]
+      for (ep_rel in affected_rel) {
+        checksums[[ep_rel]] <- rlang::hash(c(unname(checksums[[ep_rel]]), snippets_hash))
       }
     }
   }
