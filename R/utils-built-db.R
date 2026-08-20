@@ -306,13 +306,15 @@ build_status <- function(sources, db = "site/built/md5sum.txt", rebuild = FALSE,
   # in will be absolute paths, so this will check for the common path and then
   # trim it.
   build_one <- length(sources) == 1L
+  source_paths <- sources
 
   # If we have a single source passed in, this means that we want to update it
   # in the database and force it to rebuild
-  root_path <- root_path(fs::path_common(sources)) # ensure we're at the actual lesson root path
-  sources    <- relative_to_root(sources, root_path)
+  root_path <- root_path(fs::path_common(source_paths)) # ensure we're at the actual lesson root path
+  sources    <- relative_to_root(source_paths, root_path)
+  source_lookup <- stats::setNames(source_paths, sources)
 
-  built_path <- fs::path_rel(fs::path_dir(db), root_path)
+  built_path <- relative_to_root(fs::path_dir(db), root_path)
   # built files are flattened here
   built <- fs::path(built_path, fs::path_file(sources))
   built <- ifelse(
@@ -368,7 +370,7 @@ build_status <- function(sources, db = "site/built/md5sum.txt", rebuild = FALSE,
     md5$date <- date
     if (write)
       write_build_db(md5, db)
-    return(list(build = fs::path(root_path, sources), new = md5))
+    return(list(build = unname(source_lookup[sources]), new = md5))
   }
   # old checksums (2 columns: file path and checksum)
   old = read.table(db, header = TRUE)
@@ -384,7 +386,7 @@ build_status <- function(sources, db = "site/built/md5sum.txt", rebuild = FALSE,
     } else {
       new <- rbind(old, md5)
     }
-    return(list(build = fs::path(root_path, sources), new = new))
+    return(list(build = unname(source_lookup[sources]), new = new))
   }
   # FILTERING ------------------------------------------------------------------
   #
@@ -425,7 +427,12 @@ build_status <- function(sources, db = "site/built/md5sum.txt", rebuild = FALSE,
     write_build_db(one[, 1:4], db)
   }
   # files and to_remove need absolute paths so that subprocesses can run them
-  files     <- fs::path_abs(files, start = root_path)
+  file_keys  <- files
+  files      <- unname(source_lookup[file_keys])
+  missing_files <- is.na(files)
+  if (any(missing_files)) {
+    files[missing_files] <- fs::path_abs(file_keys[missing_files], start = root_path)
+  }
   to_remove <- fs::path_abs(to_remove, start = root_path)
 
   list(
