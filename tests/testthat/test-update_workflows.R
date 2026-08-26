@@ -3,7 +3,6 @@ fs::dir_create(tmp)
 init_source_path(tmp)
 ls_file <- function(i) fs::path_file(fs::dir_ls(i, all = TRUE))
 update_github_workflows(tmp, quiet = TRUE)
-fs::file_delete(fs::path(tmp, ".github", "workflows", "sandpaper-main.yaml"))
 fs::file_create(fs::path(tmp, ".github", "workflows", "no-remove.yml"))
 fs::file_create(fs::path(tmp, ".github", "workflows", "deleteme.yaml"))
 gert::git_add(".github", repo = tmp)
@@ -19,8 +18,7 @@ cli::test_that_cli("github workflows can be fetched", {
     expect_snapshot(update_github_workflows(tmp))
   })
 
-  expect_true(fs::file_exists(fs::path(tmp, ".github", "workflows", "sandpaper-main.yaml")))
-  expect_true(fs::file_exists(fs::path(tmp, ".github", "workflows", "sandpaper-version.txt")))
+  expect_true(fs::file_exists(fs::path(tmp, ".github", "workflows", "workflows-version.txt")))
   expect_true(fs::file_exists(fs::path(tmp, ".github", "workflows", "no-remove.yml")))
 
   expect_false(fs::file_exists(fs::path(tmp, ".github", "workflows", "deleteme.yaml")))
@@ -50,40 +48,41 @@ cli::test_that_cli("github workflows can be updated", {
 
   fs::dir_delete(fs::path(tmp, ".github"))
   expect_silent(update_github_workflows(tmp, quiet = TRUE))
-  gert::git_add("*", repo = tmp)
-  gert::git_commit("second", repo = tmp)
-  sm <- fs::path(tmp, ".github", "workflows", "sandpaper-main.yaml")
-  l <- readLines(sm)
-  writeLines(c("# HELLO!!!!", l), sm)
-  expect_equal(readLines(sm, n = 1), "# HELLO!!!!")
-  gert::git_add("*", repo = tmp)
-  gert::git_commit("third", repo = tmp)
-  suppressMessages({
-    expect_snapshot(update_github_workflows(tmp, "sandpaper-main.yaml"))
-  })
-  expect_failure(expect_equal(readLines(sm, n = 1), "# HELLO!!!!"))
 
 })
 
 test_that("github workflows are recognized as up-to-date", {
 
-  writeLines("0.0.0.8000", fs::path(tmp, ".github", "workflows", "sandpaper-version.txt"))
+  writeLines("0.0.0.8000", fs::path(tmp, ".github", "workflows", "workflows-version.txt"))
   gert::git_add("*", repo = tmp)
   gert::git_commit("last", repo = tmp)
   suppressMessages({
     expect_snapshot(update_github_workflows(tmp))
   })
 
-  files_we_need <- system.file("workflows", package = "sandpaper")
-  files_we_need <- c(fs::path_file(fs::dir_ls(files_we_need)), "sandpaper-version.txt")
+  release_info <- sandpaper:::fetch_latest_workflows_release_info()
+  latest_version <- release_info$latest_version
+  releases_url <- release_info$releases_url
+  body <- release_info$body
+  zip_url <- release_info$zip_url
+
+  temp_zip <- fs::file_temp(ext = ".zip")
+  httr::GET(zip_url, httr::write_disk(temp_zip, overwrite = TRUE))
+  temp_dir <- fs::dir_create(fs::file_temp())
+  utils::unzip(temp_zip, exdir = temp_dir)
+
+  files_we_need <- fs::dir_ls(temp_dir, recurse = TRUE, regexp = ".*workflows/.*\\.(md|yaml)$")
+  files_we_need <- c(files_we_need, fs::path(temp_dir, "workflows-version.txt"))
+  new_files <- character(length(files_we_need))
+  names(new_files) <- basename(files_we_need)
 
   expect_setequal(
-    ls_file(fs::path(tmp, ".github", "workflows")), 
-    files_we_need
+    ls_file(fs::path(tmp, ".github", "workflows")),
+    names(new_files)
   )
   expect_equal(
-    readLines(fs::path(tmp, ".github", "workflows", "sandpaper-version.txt")),
-    as.character(utils::packageVersion("sandpaper"))
+    readLines(fs::path(tmp, ".github", "workflows", "workflows-version.txt")),
+    as.character(latest_version)
   )
 
 })

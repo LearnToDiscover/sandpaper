@@ -1,14 +1,169 @@
-# sandpaper 0.17.2.9000
+# sandpaper 0.21.0 [2026-08-26]
+
+## NEW FEATURES
+
+* Support HPC Carpentry lesson structure
+
+## IMPROVEMENTS
+
+* Improve breadcrumb UI by lengthening prev and next text and adding ellipsis (implemented in varnish)
+* Fix Windows test fixtures with improved retry
+
+
+# sandpaper 0.20.2 [2026-05-19]
+
+## HOTFIX RELEASE
+
+* Update Ukrainian translations - thanks @olexandr-konovalov!
+* Remove duplicated page forward breadcrumb when both back and forward are pointing to 
+  index ("Home")
+* Fix CFF test
+* Add pandoc 3.8.4 snapshot
+
+
+# sandpaper 0.20.1 [2026-04-15]
+
+## ACCESSIBILITY
+
+* Alongside a range of {varnish} accessibility updates, this version fixes the unintended 
+  removal of h1 elements in overview/aggregate pages, removes the aria-labelledby attribute 
+  from progress bars, and adjusts the aria-label on pandoc/downlit code blocks. Thanks to 
+  @josenino95 for all the WCAG issue reports!
+
+## FIXES
+
+* Use GITHUB_PAT, GITHUB_TOKEN for fetching JSON from GitHub API URLs when
+  updating workflows to avoid rate limits (@froggleston)
+* Fix tab behaviour when parenthesis were used within tab admonition (reported @matthewfeickert,
+  fixed @astroDimitrios)
+* Do not fail when setup.md is empty, but warn instead (fixed @froggleston)
+
+
+# sandpaper 0.20.0 [2026-02-28]
+
+## WORKFLOWS
+
+* Workflows in `inst/workflows` are considered deprecated and will be removed in 
+  a subsequent release. Workflows are now held in a separate repository: 
+  https://github.com/carpentries/workbench-workflows. 
+  Sandpaper will pull workflows from this repository in normal operation. This 
+  means that full sandpaper releases are no longer required for workflow updates 
+  and bug fixes, improving maintainability and reducing version confusion.
+* Add lang-code input to build-and-deploy workflow (and associated carpentries/actions) to
+  support the use of @joelnitta {dovetail} package for lesson translations. Repositories
+  wishing to use translated content in `locale/` folders are now supported by 
+  the main sandpaper workflows by supplying a repo environment variable `LANG_CODE`.
 
 ## BUG FIXES
 
-* Fix glosario placeholders using non-existent slugs (reported @ErinBecker #674, fixed @froggleston #676)
+* Fix ORCiD image display on both learner and instructor citation.html pages
+  (reported, fixed @tobyhodges PR [705](https://github.com/carpentries/sandpaper/pull/705))
 
 ## MISC
 
-* Add use_site_libs option to manage_deps - allows environments to use any preinstalled site library packages
-  by adding those paths to .libPaths(). This is envisaged to be of use where already constrained environments
-  are in use, e.g. Workbench Docker containers, including GHA builds (which should be faster as a result).
+* Add support for group-tabs at different heading levels (reported @matthewfeickert #708,
+  implemented @astroDimitrios PR [709](https://github.com/carpentries/sandpaper/pull/709))
+
+
+# sandpaper 0.18.5 [2026-02-02]
+
+## WORKFLOW HOTFIXES
+
+* Revert to previous PAT requirement due to complexity of managing the manual vs
+  automated triggers. Whilst this is frustrating to revert changes, it's more 
+  reliable and less confusing for repo maintainers.
+
+
+# sandpaper 0.18.4 [2026-01-22]
+
+## NEW DOCKER WORKFLOW OPTIONS
+
+* Add support for a BUILD_RESET repo variable to docker_build_deploy, where `true` 
+  will force sandpaper to reset any previous built markdown every build step.
+  Default/omitted is `false`.
+* Add support for a AUTO_MERGE_CONTAINER_VERSION_UPDATE repo variable to 
+  docker_build_deploy, where `false` will stop auto-merging the 
+  workbench-docker-version.txt file update PR. Default/omitted is `true`.
+
+
+# sandpaper 0.18.3 [2026-01-19]
+
+## HOTFIX RELEASE
+
+* Fix more triggers
+
+
+# sandpaper 0.18.2 [2026-01-19]
+
+## HOTFIX RELEASE
+
+* Fix remaining workflow typos
+* Improve workflow trigger conditions
+
+
+# sandpaper 0.18.1 [2026-01-17]
+
+## HOTFIX RELEASE
+
+* Due to high chance of Dockerhub rate limiting the pulling of the workbench-docker image
+  by anonymous accounts when building lessons (all on a Tuesday at the same time!), move
+  to GHCR for workflows. GHCR has no rate limits for public packages.
+* Fix some problematic trigger logic in workflows.
+
+
+# sandpaper 0.18.0 [2026-01-16]
+
+## DOCKER WORKFLOWS RELEASE
+
+* Replace the existing GitHub Actions workflows with Docker versions - PR 
+  [650](https://github.com/carpentries/sandpaper/pull/650)
+
+
+# sandpaper 0.17.3 [2025-12-03]
+
+## HOTFIX RELEASE
+
+* Make {cffr} an Import not Suggests, improve warning message when cffr not available - 
+  PR [684](https://github.com/carpentries/sandpaper/pull/684)
+
+
+# sandpaper 0.17.2 [2025-12-02]
+
+## NEW FEATURES
+
+* Check for packages on GitHub if the renv lockfile specifies them. Previously, packages that 
+  weren't linked through hydration would only be attempted to be installed through a repo, and 
+  not checked on GitHub - PR [682](https://github.com/carpentries/sandpaper/pull/682) 
+  ([reported](https://github.com/carpentries/sandpaper/issues/680) @chrbknudsen)
+* Implementation of Cite This Lesson pages, built dynamically from CITATION.cff files in a 
+  lesson repo. Current brehaviour is unchanged if CITATION file exists (links to GitHub), or no 
+  file exists - PR [679](https://github.com/carpentries/sandpaper/pull/679) 
+  ([reported](https://github.com/carpentries/sandpaper/issues/508) @apirogov)
+* Add cute parrot icons for referenced Glosario terms - 
+  PR [673](https://github.com/carpentries/sandpaper/pull/673)
+
+## BUG FIXES
+
+* Fix glosario placeholders using non-existent slugs (reported @ErinBecker #674, fixed 
+  @froggleston #676)
+* Fix empty md processing, and improve md header detection 
+  ([reported](https://github.com/carpentries/workbench/issues/80) @tobyhodges, fixed 
+  @froggleston #677)
+
+## MISC
+
+* Add use_site_libs option to manage_deps - allows environments to use any preinstalled site 
+  library packages by adding those paths to .libPaths(). This is envisaged to be of use where 
+  already constrained environments are in use, e.g. Workbench Docker containers, including GHA 
+  builds (which should be faster as a result) - 
+  PR [675](https://github.com/carpentries/sandpaper/pull/675)
+* Allow CI to bypass the forced manage_deps in renv consent - adds the skip_manage_deps flag to 
+  `build_markdown()` and also to `ci_deploy()`. This is in preparation for the Dockerised 
+  Workbench workflows, where dependency management happens before this part of the codebase is 
+  run, so is superfluous. In the dockerised version of the workflows, this will be set to TRUE, 
+  but in the normal sandpaper workflows this will be FALSE, so current behaviour is maintained - 
+  PR [678](https://github.com/carpentries/sandpaper/pull/678)
+* Add test snapshots for pandoc 3.1.11
 
 
 # sandpaper 0.17.1 [2025-08-08]

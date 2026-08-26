@@ -91,22 +91,30 @@ build_episode_html <- function(path_md, path_src = NULL,
 
   # setup varnish data
   this_page <- as_html(path_md)
+  if (page_back == page_forward) {
+    page_forward <- NULL
+  }
   nav_list <- get_nav_data(path_md, path_src, home,
     this_page, page_back, page_forward)
 
   page_globals$metadata$update(c(nav_list, list(date = list(modified = date))))
   page_globals$learner$update(c(nav_list, list(
     body      = use_learner(nodes),
-    progress  = page_progress,
     updated   = date
   )))
+  if (!is.null(page_progress) && !is.na(page_progress)) {
+    page_globals$learner$update(c(nav_list, list(progress = as.character(page_progress))))
+  }
+
   nav_list$page_back <- as_html(nav_list$page_back, instructor = TRUE)
   nav_list$page_forward <- as_html(nav_list$page_forward, instructor = TRUE)
   page_globals$instructor$update(c(nav_list, list(
     body      = use_instructor(nodes),
-    progress  = page_progress,
     updated   = date
   )))
+  if (!is.null(page_progress) && !is.na(page_progress)) {
+    page_globals$instructor$update(c(nav_list, list(progress = as.character(page_progress))))
+  }
 
   build_html(template = "chapter", pkg = pkg, nodes = nodes,
     global_data = page_globals, path_md = path_md, quiet = quiet)
@@ -222,6 +230,14 @@ build_episode_md <- function(path, hash = NULL, outdir = path_built(path),
   # If we have consent to use renv and the profile exists, then we can use renv,
   # otherwise, we need to use the system library
   has_consent <- getOption("sandpaper.use_renv") && fs::dir_exists(prof)
+
+  # If a snippets config has been specified, then set up snippet customisation loading
+  use_snippets <- has_snippets_config(path)
+  custom <- if (use_snippets) get_lesson_customization(path, quiet = quiet) else NULL
+  if (is.null(custom) && valid_snippet_features(path)) {
+    stop(missing_snippets_config_error(path), call. = FALSE)
+  }
+
   args <- list(
     path    = path,
     hash    = hash,
@@ -230,7 +246,8 @@ build_episode_md <- function(path, hash = NULL, outdir = path_built(path),
     workdir = workdir,
     root    = if (has_consent) root else "",
     quiet   = quiet,
-    error   = error
+    error   = error,
+    custom  = custom
   )
 
   # Build the article in a separate  process via {callr}

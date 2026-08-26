@@ -1,6 +1,6 @@
 Package: sandpaper
 Title: Create and Curate Carpentries Lessons
-Version: 0.17.2.9000
+Version: 0.21.0
 Authors@R: c(
     person(given = "Robert",
            family = "Davey",
@@ -78,6 +78,11 @@ Authors@R: c(
            role = c("ctb"),
            email = "matthew.feickert@cern.ch",
            comment = c(ORCID = "0000-0003-4124-7862")),
+    person(given = "Dimitrios",
+           family = "Theodorakis",
+           role = c("ctb"),
+           email = "astrodimitrios@gmail.com",
+           comment = c(ORCID = "0000-0001-9288-1332")),
     person())
 Description: We provide tools to build a Carpentries-themed lesson repository
   into an accessible standalone static website. These include local tools and
@@ -107,16 +112,17 @@ Imports:
     withr,
     whisker,
     callr,
+    cffr,
     servr,
     utils,
     tools,
     stringr,
     httr,
     R.utils,
-    xfun
+    xfun,
+    nanonext (>= 1.8.0),
 Suggests:
     testthat (>= 3.0.0),
-    cffr,
     covr,
     brio,
     xml2,
@@ -124,7 +130,8 @@ Suggests:
     jsonlite,
     sessioninfo,
     mockr,
-    varnish (>= 1.0.7)
+    pak,
+    varnish (>= 1.0.9)
 Additional_repositories: https://carpentries.r-universe.dev/
 Remotes:
   carpentries/pegboard,
@@ -132,12 +139,12 @@ Remotes:
 SystemRequirements: pandoc (>= 2.11.4) - https://pandoc.org
 Encoding: UTF-8
 LazyData: true
-Config/testthat/edition: 3
-Config/testthat/parallel: false
 Config/Needs/check: rstudio/renv
 Config/potools/style: explicit
+Config/roxygen2/version: 8.0.0
+Config/testthat/edition: 3
+Config/testthat/parallel: false
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
 URL: https://carpentries.github.io/sandpaper/, https://github.com/carpentries/sandpaper/, https://carpentries.github.io/workbench/
 BugReports: https://github.com/carpentries/sandpaper/issues/
 VignetteBuilder: knitr

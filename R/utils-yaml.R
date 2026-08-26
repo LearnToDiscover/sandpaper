@@ -219,6 +219,7 @@ create_pkgdown_yaml <- function(path) {
       lc             = usr$carpentry == 'lc',
       dc             = usr$carpentry == 'dc',
       swc            = usr$carpentry == 'swc',
+      hpcc           = usr$carpentry == 'hpcc',
       # Should we display a lifecycle banner?
       life_cycle = siQuote(usr$life_cycle),
       pre_alpha  = usr$life_cycle == "pre-alpha",
@@ -279,4 +280,84 @@ quote_config_items <- function(yaml) {
     yaml[[i]] <- siQuote(yaml[[i]])
   }
   yaml
+}
+
+read_lesson_yaml <- function(path, root) {
+  if (!is.character(path) || length(path) != 1L || !nzchar(path)) {
+    stop("YAML file path must be a non-empty string", call. = FALSE)
+  }
+
+  cfg_path <- if (fs::is_absolute_path(path)) path else fs::path(root, path)
+  if (!fs::file_exists(cfg_path)) {
+    stop("YAML file not found: ", path, call. = FALSE)
+  }
+
+  list(
+    config = yaml::read_yaml(cfg_path, eval.expr = FALSE),
+    path = fs::path_abs(cfg_path)
+  )
+}
+
+normalize_snippets_config_name <- function(path) {
+  if (!is.character(path) || length(path) != 1L) {
+    return(NULL)
+  }
+
+  path <- trimws(path)
+  if (!nzchar(path)) {
+    return(NULL)
+  }
+
+  if (grepl("_config_options[.]ya?ml$", path, ignore.case = TRUE)) {
+    path <- fs::path_file(fs::path_dir(path))
+  }
+
+  path <- fs::path_file(path)
+  if (!nzchar(path)) {
+    return(NULL)
+  }
+
+  path
+}
+
+snippets_config_paths <- function(path, root) {
+  name <- normalize_snippets_config_name(path)
+  if (is.null(name)) {
+    return(character(0))
+  }
+
+  customization <- path_customization(root)
+  c(
+    fs::path(customization, name, "_config_options.yml"),
+    fs::path(customization, name, "_config_options.yaml")
+  )
+}
+
+is_valid_snippets_config <- function(path, root) {
+  if (!is.character(path) || length(path) != 1L || !nzchar(path)) {
+    return(FALSE)
+  }
+
+  any(fs::file_exists(snippets_config_paths(path, root)))
+}
+
+has_snippets_config <- function(path) {
+  root <- tryCatch(root_path(path), error = function(...) NULL)
+  if (is.null(root)) {
+    return(FALSE)
+  }
+
+  cfg_file <- path_config(root)
+  if (!fs::file_exists(cfg_file)) {
+    return(FALSE)
+  }
+
+  lesson_config <- yaml::read_yaml(cfg_file, eval.expr = FALSE)
+  base_snippets <- lesson_config$workbench_base_customization
+  use_snippets <- !is.null(base_snippets) && is.character(base_snippets) && length(base_snippets) == 1L && nzchar(trimws(base_snippets))
+  if (!use_snippets) {
+    return(FALSE)
+  }
+
+  is_valid_snippets_config(base_snippets, root)
 }
