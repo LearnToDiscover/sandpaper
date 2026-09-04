@@ -19,12 +19,12 @@ jobs:
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
-      - uses: r-lib/actions/setup-r@6f6e5bc62fba3a704f74e7ad7ef7676c5c6a2590 # v2
+      - uses: r-lib/actions/setup-r@465b7d8e732ca3921382b1674c59bada9cbf3399 # v2
         with:
           use-public-rspm: true
 
       - name: "Set up pandoc"
-        uses: r-lib/actions/setup-pandoc@6f6e5bc62fba3a704f74e7ad7ef7676c5c6a2590 # v2
+        uses: r-lib/actions/setup-pandoc@465b7d8e732ca3921382b1674c59bada9cbf3399 # v2
 
       - name: "Set up Chrome" # for PDF rendering
         uses: browser-actions/setup-chrome@b94431e051d1c52dcbe9a7092a4f10f827795416 # v2.1.0
@@ -54,7 +54,7 @@ jobs:
           printf "libxslt-dev\n" >> ${{ runner.temp }}/sysdeps.txt
           sudo xargs apt-get install --fix-missing -y < ${{ runner.temp }}/sysdeps.txt || echo "Not on Ubuntu"
 
-      - uses: r-lib/actions/setup-r-dependencies@6f6e5bc62fba3a704f74e7ad7ef7676c5c6a2590 # v2
+      - uses: r-lib/actions/setup-r-dependencies@465b7d8e732ca3921382b1674c59bada9cbf3399 # v2
         with:
           extra-packages: any::covr
           needs: coverage
