@@ -25,6 +25,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Robert Davey \email{robertdavey@carpentries.org} (\href{https://orcid.org/0000-0002-5589-7754}{ORCID})
   \item Erin Becker \email{erinbecker@carpentries.org} (\href{https://orcid.org/0000-0002-6832-0233}{ORCID})
   \item Zhian N. Kamvar \email{zkamvar@carpentries.org} (\href{https://orcid.org/0000-0003-1458-7108}{ORCID})
   \item Joel H. Nitta \email{joelnitta@gmail.com} (\href{https://orcid.org/0000-0003-4719-7472}{ORCID}) [translator]
@@ -45,6 +46,7 @@ Other contributors:
   \item Phil Reed \email{phil.reed@manchester.ac.uk} (\href{https://orcid.org/0000-0002-4479-715X}{ORCID}) [contributor]
   \item Sarah Brown \email{brownsarahm@uri.edu} (\href{https://orcid.org/0000-0001-5728-0822}{ORCID}) [contributor]
   \item Matthew Feickert \email{matthew.feickert@cern.ch} (\href{https://orcid.org/0000-0003-4124-7862}{ORCID}) [contributor]
+  \item Dimitrios Theodorakis \email{astrodimitrios@gmail.com} (\href{https://orcid.org/0000-0001-9288-1332}{ORCID}) [contributor]
 }
 
 }

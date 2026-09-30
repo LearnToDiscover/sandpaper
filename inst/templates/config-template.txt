@@ -2,10 +2,11 @@
 # Values for this lesson.
 #------------------------------------------------------------
 
-# Which carpentry is this (swc, dc, lc, or cp)?
-# swc: Software Carpentry
+# Which carpentry is this (dc, hpcc, lc, swc, or cp)?
 # dc: Data Carpentry
+# hpcc: HPC Carpentry
 # lc: Library Carpentry
+# swc: Software Carpentry
 # cp: Carpentries (to use for instructor training for instance)
 # incubator: The Carpentries Incubator
 # Note that you can also use a custom carpentry type. For more info,
@@ -26,7 +27,8 @@ created: {{ created }}{{ ^created }}~ # FIXME {{ /created }}
 keywords: {{keywords}}{{^keywords}}software, data, lesson, The Carpentries # FIXME{{/keywords}}
 
 # Life cycle stage of the lesson
-# possible values: pre-alpha, alpha, beta, stable
+# refer to <https://docs.carpentries.org/resources/curriculum/lesson-life-cycle.html> for details
+# possible values: pre-alpha, alpha, beta, stable, retired
 life_cycle: {{ life_cycle }}
 
 # License of the lesson materials (recommended CC-BY 4.0)

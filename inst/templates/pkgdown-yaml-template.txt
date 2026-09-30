@@ -18,8 +18,9 @@ template:
     license: {{ license }}
     handout: {{ handout }}
     cp: {{ cp }}
-    lc: {{ lc }}
     dc: {{ dc }}
+    hpcc: {{ hpcc }}
+    lc: {{ lc }}
     swc: {{ swc }}
     carpentry: {{ carpentry }}
     carpentry_name: {{ carpentry_name }}
@@ -29,4 +30,5 @@ template:
     alpha: {{ alpha }}
     beta: {{ beta }}
     stable: {{ stable }}
+    retired: {{ retired }}
     doi: {{ doi }}

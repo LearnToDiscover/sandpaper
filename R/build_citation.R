@@ -121,12 +121,11 @@ read_cff <- function(cff_file) {
     cff_file <- fs::path_abs(cff_file)
 
     if (requireNamespace("cffr", quietly = TRUE)) {
-
       # surround with tryCatch to handle potential errors
       tryCatch({
         valid <- cffr::cff_validate(cff_file)
         if (!valid) {
-            cli::cli_alert_warning("CITATION.CFF file is not valid according to CFF schema.")
+            cli::cli_alert_warning("CITATION.cff file is not valid according to CFF schema.")
             return(NULL)
         }
 
@@ -136,9 +135,12 @@ read_cff <- function(cff_file) {
             return(cff_data)
         }
       }, error = function(e) {
-        cli::cli_alert_warning("Error reading CITATION.CFF file: {e$message}")
+        cli::cli_alert_warning("Error reading CITATION.cff file: {e$message}")
         return(NULL)
       })
+    } else {
+      cli::cli_alert_warning("{cffr} is required but not installed - cannot parse CITATION.cff file.")
+      return(NULL)
     }
   }
 
@@ -205,38 +207,14 @@ generate_author_names <- function(authors, env, output_html = TRUE) {
 #' @keywords internal
 build_citation <- function(pkg, quiet = FALSE) {
   page_globals <- setup_page_globals()
-  calls <- sys.calls()
-  # When the page is in production (e.g. built with one of the `ci_` functions,
-  # then we need to set the absolute paths to the site
-  is_prod <- in_production(calls)
-  if (is_prod) {
-    url  <- page_globals$metadata$get()$url
-    page_globals$instructor$set(c("site", "root"), url)
-    page_globals$learner$set(c("site", "root"), url)
-  }
+  path  <- get_source_path() %||% root_path(pkg$src_path)
 
   html <- xml2::read_html(render_html(template_cff()))
-  if (is_prod) {
-    # make sure index links back to the original root
-    lnk <- xml2::xml_find_first(html, ".//a[@href='index.html']")
-    xml2::xml_set_attr(lnk, "href", url)
-    # update navigation so that we have full URL
-    nav <- page_globals$learner$get()[c("sidebar", "more", "resources")]
-    for (item in names(nav)) {
-      # replace the relative index with
-      new <- fix_sidebar_href(nav[[item]], server = url)
-      if (length(nav[[item]]) == 1L) {
-        new <- paste(new, collapse = "")
-      }
-      page_globals$learner$set(item, new)
-      page_globals$instructor$set(item, new)
-    }
-  }
   fix_nodes(html)
 
   cff_meta <- this_metadata$get()$cff
   if (is.null(cff_meta) || cff_meta == "CITATION") {
-    cli::cli_alert_warning("No CITATION.CFF file found. Falling back to default behaviour.")
+    cli::cli_alert_warning("No CITATION.cff file found. Falling back to default behaviour.")
   }
   else {
     cff_env <- parse_cff(cff_meta)
@@ -262,9 +240,15 @@ build_citation <- function(pkg, quiet = FALSE) {
       body = html,
       pagetitle = tr_computed("CiteThisLesson")
     )
-    page_globals$instructor$update(this_dat)
     page_globals$learner$update(this_dat)
     page_globals$metadata$update(this_dat)
+
+    page_globals$instructor$update(list(
+      this_page = "citation.html",
+      body = use_instructor(html),
+      pagetitle = tr_computed("CiteThisLesson")
+    ))
+
 
     build_html(template = "citation", pkg = pkg, nodes = html,
                global_data = page_globals, path_md = "citation.html", quiet = quiet)

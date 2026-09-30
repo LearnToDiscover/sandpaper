@@ -21,7 +21,11 @@ get_built_db <- function(db = "site/built/md5sum.txt", filter = "*R?md") {
     return(data.frame(file = character(0), checksum = character(0), built = character(0)))
   }
   files <- read.table(db, header = TRUE)
-  are_markdown <- grepl(filter, fs::path_ext(files[["file"]]))
+  are_markdown <- if (identical(filter, "*")) {
+    rep(TRUE, nrow(files))
+  } else {
+    grepl(filter, fs::path_ext(files[["file"]]))
+  }
   return(files[are_markdown, , drop = FALSE])
 }
 
@@ -165,6 +169,18 @@ hash_children <- function(checksums, files, lineage) {
   return(res)
 }
 
+relative_to_root <- function(path, root) {
+  rel <- fs::path_rel(path, start = root)
+  needs_dedotting <- startsWith(rel, "..")
+  if (any(needs_dedotting)) {
+    rel[needs_dedotting] <- fs::path_rel(
+      fs::path_real(path[needs_dedotting]),
+      start = fs::path_real(root)
+    )
+  }
+  rel
+}
+
 # Return list of child nodes used in each file
 #' @rdname hash_children
 #' @param lsn a [pegboard::Lesson] object
@@ -177,7 +193,7 @@ get_lineages <- function(lsn) {
   # We need to set the names to the relative path to match our file inputs
   names(lineages) <- vapply(lineages,
     FUN = function(l, p) {
-      fs::path_rel(l[1], start = p)
+      relative_to_root(l[1], p)
     },
     FUN.VALUE = character(1),
     p = lsn$path
@@ -290,13 +306,15 @@ build_status <- function(sources, db = "site/built/md5sum.txt", rebuild = FALSE,
   # in will be absolute paths, so this will check for the common path and then
   # trim it.
   build_one <- length(sources) == 1L
+  source_paths <- sources
 
   # If we have a single source passed in, this means that we want to update it
   # in the database and force it to rebuild
-  root_path <- root_path(fs::path_common(sources)) # ensure we're at the actual lesson root path
-  sources    <- fs::path_rel(sources, start = root_path)
+  root_path <- root_path(fs::path_common(source_paths)) # ensure we're at the actual lesson root path
+  sources    <- relative_to_root(source_paths, root_path)
+  source_lookup <- stats::setNames(source_paths, sources)
 
-  built_path <- fs::path_rel(fs::path_dir(db), root_path)
+  built_path <- relative_to_root(fs::path_dir(db), root_path)
   # built files are flattened here
   built <- fs::path(built_path, fs::path_file(sources))
   built <- ifelse(
@@ -306,6 +324,7 @@ build_status <- function(sources, db = "site/built/md5sum.txt", rebuild = FALSE,
   date <- format(Sys.Date(), "%F")
   # calculate checksums -------------------------------------------------------
   checksums <- tools::md5sum(fs::path(root_path, sources))
+  names(checksums) <- sources
   # if there are any RMD documents, we check for child documents
   is_rmd <- tolower(fs::path_ext(sources)) == "rmd"
   if (any(is_rmd)) {
@@ -318,6 +337,24 @@ build_status <- function(sources, db = "site/built/md5sum.txt", rebuild = FALSE,
     # update the checksums of the parent
     # using rlang::hash(sumparent, sumchild, ...)
     checksums <- hash_children(checksums, sources, children)
+  }
+  # mix in snippets hash for any episode that uses snippet features
+  if (any(is_rmd)) {
+    snippets_hash <- get_snippets_hash(root_path)
+    if (!is.null(snippets_hash)) {
+      rmd_sources_rel <- sources[is_rmd]
+      rmd_sources_abs <- fs::path(root_path, rmd_sources_rel)
+      uses_snippets <- vapply(
+        rmd_sources_abs,
+        valid_snippet_features,
+        logical(1),
+        USE.NAMES = FALSE
+      )
+      affected_rel <- rmd_sources_rel[uses_snippets]
+      for (ep_rel in affected_rel) {
+        checksums[[ep_rel]] <- rlang::hash(c(unname(checksums[[ep_rel]]), snippets_hash))
+      }
+    }
   }
   md5 = data.frame(
     file     = sources,
@@ -333,7 +370,7 @@ build_status <- function(sources, db = "site/built/md5sum.txt", rebuild = FALSE,
     md5$date <- date
     if (write)
       write_build_db(md5, db)
-    return(list(build = fs::path(root_path, sources), new = md5))
+    return(list(build = unname(source_lookup[sources]), new = md5))
   }
   # old checksums (2 columns: file path and checksum)
   old = read.table(db, header = TRUE)
@@ -349,7 +386,7 @@ build_status <- function(sources, db = "site/built/md5sum.txt", rebuild = FALSE,
     } else {
       new <- rbind(old, md5)
     }
-    return(list(build = fs::path(root_path, sources), new = new))
+    return(list(build = unname(source_lookup[sources]), new = new))
   }
   # FILTERING ------------------------------------------------------------------
   #
@@ -390,7 +427,12 @@ build_status <- function(sources, db = "site/built/md5sum.txt", rebuild = FALSE,
     write_build_db(one[, 1:4], db)
   }
   # files and to_remove need absolute paths so that subprocesses can run them
-  files     <- fs::path_abs(files, start = root_path)
+  file_keys  <- files
+  files      <- unname(source_lookup[file_keys])
+  missing_files <- is.na(files)
+  if (any(missing_files)) {
+    files[missing_files] <- fs::path_abs(file_keys[missing_files], start = root_path)
+  }
   to_remove <- fs::path_abs(to_remove, start = root_path)
 
   list(

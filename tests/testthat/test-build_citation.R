@@ -30,7 +30,7 @@ test_that("read_cff returns error for malformed CFF file", {
   # check that a warning is issued for invalid CFF
   expect_message(
     read_cff(tmp_cff),
-    "Error reading CITATION.CFF file: 'object' must be a list or expression"
+    "Error reading CITATION.cff file: 'object' must be a list or expression"
   )
 })
 
@@ -46,7 +46,7 @@ test_that("read_cff outputs error when field missing from CFF file", {
   ), tmp_cff)
   expect_message(
     read_cff(tmp_cff),
-    "cff.message: is required"
+    "cff/: must have required property 'message'"
   )
 })
 

@@ -9,7 +9,8 @@ ci_deploy(
   md_branch = "md-outputs",
   site_branch = "gh-pages",
   remote = "origin",
-  reset = FALSE
+  reset = FALSE,
+  skip_manage_deps = FALSE
 )
 }
 \arguments{
@@ -24,6 +25,11 @@ ci_deploy(
 \item{reset}{if \code{TRUE}, the markdown cache is cleared before rebuilding,
 this defaults to \code{FALSE} meaning the markdown cache will be provisioned
 and used.}
+
+\item{skip_manage_deps}{if \code{TRUE}, dependency management will NOT be processed.
+This defaults to \code{FALSE}. Set this to TRUE to force dependency management
+to be handled in the separate package cache update and apply steps in the
+CI workflow, and therefore can be skipped.}
 }
 \value{
 Nothing, invisibly. This is used for it's side-effect
@@ -83,7 +89,7 @@ installed on your machine and will destroy anything you have in the
 lockfile has changed.
 }
 \examples{
-\dontshow{if (sandpaper:::example_can_run()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (sandpaper:::example_can_run()) withAutoprint(\{ # examplesIf}
 # For this example, we are setting up a temporary repository with a local
 # remote called `sandpaper-local`. This demonstrates how `ci_deploy()`
 # modifies the remote, but there are setup and teardown steps to run.

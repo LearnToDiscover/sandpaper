@@ -78,6 +78,8 @@ establish_translation_vars <- function() {
       iAlpha = tr_('Alpha'),
       BetaNote = tr_('This lesson is in the beta phase, which means that it is ready for teaching by instructors outside of the original author team.'),
       iBeta = tr_('Beta'),
+      RetiredNote = tr_('This lesson has been retired. It is no longer actively maintained and the content may be outdated.'),
+      iRetired = tr_('Retired'),
       PeerReview = tr_('This lesson has passed peer review.'),
       InstructorView = tr_('Instructor View'),   # navbar.html
       LearnerView = tr_('Learner View'),         # navbar.html
@@ -100,6 +102,7 @@ establish_translation_vars <- function() {
       Home = tr_('Home'), # content-chapter.html
       HomePageNav = tr_('Home Page Navigation'), # alt text
       RESOURCES = tr_('RESOURCES'),
+      LINKS = tr_('LINKS'),
       ExtractAllImages = tr_('Extract All Images'),
       AIO = tr_("See all in one page"),
       DownloadHandout = tr_('Download Lesson Handout'),

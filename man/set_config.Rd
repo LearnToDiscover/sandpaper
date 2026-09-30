@@ -35,7 +35,7 @@ the footer are accurate, please modify these values.
 \item \strong{title} \verb{[character]} the lesson title (e.g. \code{'Introduction to R for Plant Pathologists'}
 \item \strong{created} \verb{[character]} Date in ISO 8601 format (e.g. \code{'2021-02-09'})
 \item \strong{keywords} \verb{[character]} comma-separated list (e.g \code{'static site, R, tidyverse'})
-\item \strong{life_cycle} \verb{[character]} one of pre-alpha, alpha, beta, stable
+\item \strong{life_cycle} \verb{[character]} one of pre-alpha, alpha, beta, stable, retired
 \item \strong{license} \verb{[character]} a license for the lesson (e.g. \code{'CC-BY 4.0'})
 \item \strong{source} \verb{[character]} the source repository URL
 \item \strong{branch} \verb{[character]} the default branch (e.g. \code{'main'})
@@ -66,7 +66,7 @@ of overview lessons. To indicate that your lesson serves as an overview for
 other lessons, use \code{overview: true}
 \item \strong{handout} \verb{[boolean]} or \verb{[character]} This option instructs \code{{sandpaper}}
 to create a handout of all RMarkdown files via \code{{pegboard}}, which uses
-\code{\link[knitr:knit]{knitr::purl()}} in the background after removing everything but the
+\code{\link[knitr:purl]{knitr::purl()}} in the background after removing everything but the
 challenges (without solutions) and any code blocks where \code{purl = TRUE}. The
 default path for the handout is \code{files/code-handout.R}
 }
